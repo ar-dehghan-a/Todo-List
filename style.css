@@ -1,0 +1,31 @@
+body {
+  background-color: #352f5b !important;
+}
+
+input[type="text"],
+input[type="text"]:focus {
+  color: #fff;
+  border: none;
+  background: rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+}
+
+.tasks li {
+  background-color: #423a6f;
+}
+
+.complete li {
+  background-color: #423a6f;
+}
+
+.delete {
+  cursor: pointer;
+}
+
+.check {
+  cursor: pointer;
+}
+
+.back {
+  cursor: pointer;
+}
