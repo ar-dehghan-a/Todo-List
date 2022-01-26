@@ -36,6 +36,31 @@ const generateTemplateCompleted = completed => {
 
 };
 
+// set local storage
+let tasks = localStorage.getItem('tasks');
+tasks = tasks === null ? [] : JSON.parse(tasks);
+for (const task of tasks) {
+    generateTemplateTask(task);
+}
+
+let completed = localStorage.getItem('completed');
+completed = completed === null ? [] : JSON.parse(completed);
+for (const complete of completed) {
+    generateTemplateCompleted(complete);
+}
+
+const StorageTask = value => {
+    if (value !== undefined) {
+        tasks.push(value);
+    }
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+};
+const StorageCompleted = value => {
+    if (value !== undefined) {
+        completed.push(value);
+    }
+    localStorage.setItem('completed', JSON.stringify(completed));
+};
 
 // add tasks
 addForm.addEventListener('submit', e => {
@@ -45,26 +70,33 @@ addForm.addEventListener('submit', e => {
 
     if (task.value.trim().length) {
         generateTemplateTask(task.value.trim());
-        task.value = "";
+        StorageTask(task.value.trim());
+        addForm.reset();
     }
 
 });
 
 
-// add and back completed
+// add and back to completed
 lists.forEach(list => {
 
     list.addEventListener('click', e => {
 
-        const completed = e.target.parentElement.parentElement;
+        const task = e.target.parentElement.parentElement;
 
         if (e.target.classList.contains('check')) {
-            generateTemplateCompleted(completed.textContent.trim());
-            completed.remove();
+            generateTemplateCompleted(task.textContent.trim());
+            StorageCompleted(task.textContent.trim());
+            tasks = tasks.filter(item => item !== task.textContent.trim());
+            StorageTask();
+            task.remove();
         }
         if (e.target.classList.contains('back')) {
-            generateTemplateTask(completed.textContent.trim());
-            completed.remove();
+            generateTemplateTask(task.textContent.trim());
+            StorageTask(task.textContent.trim());
+            completed = completed.filter(item => item !== task.textContent.trim());
+            StorageCompleted();
+            task.remove();
         }
 
     });
@@ -76,7 +108,13 @@ lists.forEach(list => {
 lists.forEach(list => {
     list.addEventListener('click', e => {
 
+        const value = e.target.parentElement.parentElement.textContent.trim();
+
         if (e.target.classList.contains('delete')) {
+            tasks = tasks.filter(item => item !== value);
+            StorageTask();
+            completed = completed.filter(item => item !== value);
+            StorageCompleted();
             e.target.parentElement.parentElement.remove();
         }
 

@@ -11,11 +11,11 @@ input[type="text"]:focus {
 }
 
 .tasks li {
-  background-color: #423a6f;
+  background-color: rgba(100, 100, 100, 0.3);
 }
 
 .complete li {
-  background-color: #423a6f;
+  background-color: rgba(100, 100, 100, 0.3);
 }
 
 .delete {
