@@ -36,32 +36,6 @@ const generateTemplateCompleted = completed => {
 
 };
 
-// set local storage
-let tasks = localStorage.getItem('tasks');
-tasks = tasks === null ? [] : JSON.parse(tasks);
-for (const task of tasks) {
-    generateTemplateTask(task);
-}
-
-let completed = localStorage.getItem('completed');
-completed = completed === null ? [] : JSON.parse(completed);
-for (const complete of completed) {
-    generateTemplateCompleted(complete);
-}
-
-const StorageTask = value => {
-    if (value !== undefined) {
-        tasks.push(value);
-    }
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-};
-const StorageCompleted = value => {
-    if (value !== undefined) {
-        completed.push(value);
-    }
-    localStorage.setItem('completed', JSON.stringify(completed));
-};
-
 // add tasks
 addForm.addEventListener('submit', e => {
 
@@ -70,7 +44,7 @@ addForm.addEventListener('submit', e => {
 
     if (task.value.trim().length) {
         generateTemplateTask(task.value.trim());
-        StorageTask(task.value.trim());
+        locally.setTask(task.value.trim());
         addForm.reset();
     }
 
@@ -86,16 +60,14 @@ lists.forEach(list => {
 
         if (e.target.classList.contains('check')) {
             generateTemplateCompleted(task.textContent.trim());
-            StorageCompleted(task.textContent.trim());
-            tasks = tasks.filter(item => item !== task.textContent.trim());
-            StorageTask();
+            locally.setCompleted(task.textContent.trim());
+            locally.deleteTask(task.textContent.trim());
             task.remove();
         }
         if (e.target.classList.contains('back')) {
             generateTemplateTask(task.textContent.trim());
-            StorageTask(task.textContent.trim());
-            completed = completed.filter(item => item !== task.textContent.trim());
-            StorageCompleted();
+            locally.setTask(task.textContent.trim());
+            locally.deleteCompleted(task.textContent.trim());
             task.remove();
         }
 
@@ -104,18 +76,16 @@ lists.forEach(list => {
 });
 
 
-// delete task
+// delete tasks
 lists.forEach(list => {
     list.addEventListener('click', e => {
 
-        const value = e.target.parentElement.parentElement.textContent.trim();
+        const task = e.target.parentElement.parentElement;
 
         if (e.target.classList.contains('delete')) {
-            tasks = tasks.filter(item => item !== value);
-            StorageTask();
-            completed = completed.filter(item => item !== value);
-            StorageCompleted();
-            e.target.parentElement.parentElement.remove();
+            locally.deleteTask(task.textContent.trim());
+            locally.deleteCompleted(task.textContent.trim());
+            task.remove();
         }
 
     });
@@ -125,19 +95,61 @@ lists.forEach(list => {
 // search
 const filterTasks = (term) => {
 
-    Array.from(listTask.children)
+    const all = [...Array.from(listTask.children), ...Array.from(listCompleted.children)];
+
+    Array.from(all)
         .filter((task) => !task.textContent.toLowerCase().includes(term))
         .forEach((task) => task.classList.add('d-none'));
 
-    Array.from(listTask.children)
+    Array.from(all)
         .filter((task) => task.textContent.toLowerCase().includes(term))
         .forEach((task) => task.classList.remove('d-none'));
 
 };
-
 search.addEventListener('keyup', () => {
 
     const term = search.value.toLowerCase().trim();
     filterTasks(term);
 
 });
+
+// set local storage
+class LocalStorage {
+    constructor() {
+        this.tasks = localStorage.getItem('tasks');
+        this.completed = localStorage.getItem('completed');
+    }
+    init() {
+        this.tasks = this.tasks === null ? [] : JSON.parse(this.tasks);
+        for (const task of this.tasks) {
+            generateTemplateTask(task);
+        }
+        this.completed = this.completed === null ? [] : JSON.parse(this.completed);
+        for (const complete of this.completed) {
+            generateTemplateCompleted(complete);
+        }
+    }
+    setTask(value = '') {
+        if (value !== '') {
+            this.tasks.push(value);
+        }
+        localStorage.setItem('tasks', JSON.stringify(this.tasks));
+    }
+    setCompleted(value = '') {
+        if (value !== '') {
+            this.completed.push(value);
+        }
+        localStorage.setItem('completed', JSON.stringify(this.completed));
+    }
+    deleteTask(value) {
+        this.tasks = this.tasks.filter(task => task !== value);
+        this.setTask();
+    }
+    deleteCompleted(value) {
+        this.completed = this.completed.filter(complete => complete !== value);
+        this.setCompleted();
+    }
+}
+
+const locally = new LocalStorage();
+locally.init();
